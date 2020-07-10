@@ -1,0 +1,19 @@
+{
+  "name": "thorin-plugin-bull",
+  "author": "iWelcome",
+  "version": "1.0.00",
+  "dependencies": {
+    "bull": "^3.15.0"
+  },
+  "description": "Thorin.js job queue plugin based on Bull",
+  "main": "index.js",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Thorinjs/Thorin-plugin-tasks"
+  },
+  "homepage": "http://thorinjs.com",
+  "bugs": {
+    "url": "https://github.com/Thorinjs/Thorin-plugin-tasks/issues"
+  }
+}
