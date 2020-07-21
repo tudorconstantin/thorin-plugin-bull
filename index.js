@@ -2,7 +2,6 @@
 const path = require('path'),
   fs = require('fs'),
   Queue = require('bull');
-// initJobEntry = require('./lib/jobEntry');
 /**
  * Created by Tudor on 09-Jul-2020.
  *
@@ -16,33 +15,14 @@ module.exports = function (thorin, opt, pluginName) {
     debug: true,
     redisUrl: 'redis://localhost:6379',
     defaultProcesses: 2,
-    numProcesses: {
+    jobsProcesses: {
       helloWorld: 5,
     },
-    jobs: {},
   }, opt);
   const pluginObj = {},
     async = thorin.util.async,
     REGISTERED_QUEUES = {};
-  // JobEntry = initJobEntry(thorin, opt);
-
-  /*
-   * Register a new job.
-   * */
-  // pluginObj.addJob = function (jobName, _opt) {
-  //   if (typeof REGISTERED_QUEUES[jobName] !== 'undefined') {
-  //     throw new thorin.error('JOBS.EXISTS', 'The job ' + jobName + ' is already registered.');
-  //   }
-  //   let jobConfig = thorin.util.extend(opt[jobName] || {}, _opt);
-  //   let jobObj = new JobEntry(jobName, jobConfig);
-  //   REGISTERED_QUEUES[jobName] = jobObj;
-  //   process.nextTick(() => {
-  //     // at this point, check any previous timers.
-  //     jobObj.start(undefined, true);
-  //   });
-  //   return jobObj;
-  // }
-
+ 
   /*
    * Returns a specific job by its name.
    * */
@@ -97,7 +77,7 @@ module.exports = function (thorin, opt, pluginName) {
             throw new Error(`Job ${REGISTERED_QUEUES[processorName]} already exists`);
           }
           REGISTERED_QUEUES[processorName] = new Queue(processorName, opt.redisUrl);
-          REGISTERED_QUEUES[processorName].process(opt.numProcesses[processorName] || opt.defaultProcesses, fileName);
+          REGISTERED_QUEUES[processorName].process(opt.jobsProcesses[processorName] || opt.defaultProcesses, fileName);
         }
 
       } catch (e) {
@@ -111,7 +91,6 @@ module.exports = function (thorin, opt, pluginName) {
    * */
   pluginObj.run = function (done) {
     if (!opt.enabled) return done();
-    // thorin.loadPath(opt.path);
     pluginObj.setup(() => { });
     done();
   }

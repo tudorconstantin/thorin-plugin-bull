@@ -1,4 +1,2 @@
-# Thorin.js task management utility
+# Thorin.js plugin for the Bull.js job queue
 ## Full documentation available at https://thorinjs.com
-
-### Plugin specific documentation available at https://thorinjs.com/plugin/tasks
