@@ -1,6 +1,6 @@
 {
   "name": "thorin-plugin-bull",
-  "author": "iWelcome",
+  "author": "Tudor Constantin",
   "version": "1.0.00",
   "dependencies": {
     "bull": "^3.15.0"
@@ -10,10 +10,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Thorinjs/Thorin-plugin-tasks"
+    "url": "https://github.com/tudorconstantin/thorin-plugin-bull"
   },
   "homepage": "http://thorinjs.com",
   "bugs": {
-    "url": "https://github.com/Thorinjs/Thorin-plugin-tasks/issues"
+    "url": "https://github.com/tudorconstantin/thorin-plugin-bull/issues"
   }
 }
