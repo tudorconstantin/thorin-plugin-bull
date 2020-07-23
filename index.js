@@ -31,6 +31,13 @@ module.exports = function (thorin, opt, pluginName) {
   }
 
   /*
+   * Returns an array containing all queue names ()
+   * */
+  pluginObj.getQueueNames = function () {
+    return Object.keys(REGISTERED_QUEUES);
+  }
+
+  /*
    * Stops all jobs.
    * */
   pluginObj.stopJobs = function StopAllJobs(fn) {
