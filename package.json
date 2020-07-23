@@ -1,7 +1,7 @@
 {
   "name": "thorin-plugin-bull",
   "author": "Tudor Constantin",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "dependencies": {
     "bull": "^3.15.0"
   },
