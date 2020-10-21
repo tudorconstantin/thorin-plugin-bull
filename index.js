@@ -13,7 +13,13 @@ module.exports = function (thorin, opt, pluginName) {
     path: 'app/jobs',
     enabled: true,
     debug: true,
-    redisUrl: 'redis://localhost:6379',
+    redis: {
+      prefix: '{jobs}',
+      clustered: false,
+      host: 'localhost',
+      port: 6379,
+      password: null,
+    },
     defaultProcesses: 2,
     jobsProcesses: {
       helloWorld: 5,
@@ -83,7 +89,14 @@ module.exports = function (thorin, opt, pluginName) {
           if(REGISTERED_QUEUES[processorName]){
             throw new Error(`Job ${REGISTERED_QUEUES[processorName]} already exists`);
           }
-          REGISTERED_QUEUES[processorName] = new Queue(processorName, opt.redisUrl);
+          REGISTERED_QUEUES[processorName] = new Queue(processorName, {
+            redis: {
+              host: opt?.redis?.host || 'localhost',
+              port: opt?.redis?.port || 6379,
+              password: opt?.redis?.password || null,
+            },
+            prefix: opt?.redis?.prefix || '{worker}',
+           });
           REGISTERED_QUEUES[processorName].process(opt.jobsProcesses[processorName] || opt.defaultProcesses, fileName);
         }
 
