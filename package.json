@@ -3,7 +3,8 @@
   "author": "Tudor Constantin",
   "version": "1.1.0",
   "dependencies": {
-    "bull": "^3.15.0"
+    "bull": "^3.15.0",
+    "ioredis": "^4.17.3"
   },
   "description": "Thorin.js job queue plugin based on Bull",
   "main": "index.js",

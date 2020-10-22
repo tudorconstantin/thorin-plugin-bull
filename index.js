@@ -28,7 +28,7 @@ module.exports = function (thorin, opt, pluginName) {
   const pluginObj = {},
     async = thorin.util.async,
     REGISTERED_QUEUES = {};
- 
+
   /*
    * Returns a specific job by its name.
    * */
@@ -75,6 +75,38 @@ module.exports = function (thorin, opt, pluginName) {
     });
     return results;
   }
+
+  const _getConnOpts = function (redisOpts) {
+
+    if (!redisOpts?.clustered) {
+      return {
+        redis: {
+          host: opt?.redis?.host || 'localhost',
+          port: opt?.redis?.port || 6379,
+          password: opt?.redis?.password || null,
+        },
+        prefix: opt?.redis?.prefix || '{worker}',
+      }
+    }
+
+    const Redis = require('ioredis');
+    const client = new Redis.cluster([{ host: redisOpts.host }], { dnsLookup: (address, callback) => callback(null, address) });
+    const subscriber = new Redis.cluster([{ host: redisOpts.host }], { dnsLookup: (address, callback) => callback(null, address) });
+    let opts = {
+      createClient: function (type) {
+        switch (type) {
+          case 'client':
+            return client;
+          case 'subscriber':
+            return subscriber;
+          default:
+            return new Redis.cluster([{ host: redisOpts.host }], { dnsLookup: (address, callback) => callback(null, address) });
+        }
+      }
+    }
+
+    return opts;
+  }
   /*
    * Setup the job plugin
    * */
@@ -84,19 +116,14 @@ module.exports = function (thorin, opt, pluginName) {
       try {
         thorin.util.fs.ensureDirSync(path.normalize(thorin.root + '/' + SETUP_DIRECTORIES[i]));
         const processorFiles = dirWalk(path.normalize(thorin.root + '/' + SETUP_DIRECTORIES[i]));
-        for (const fileName of processorFiles){
+        for (const fileName of processorFiles) {
           const processorName = path.basename(fileName, path.extname(fileName));
-          if(REGISTERED_QUEUES[processorName]){
+          if (REGISTERED_QUEUES[processorName]) {
             throw new Error(`Job ${REGISTERED_QUEUES[processorName]} already exists`);
           }
-          REGISTERED_QUEUES[processorName] = new Queue(processorName, {
-            redis: {
-              host: opt?.redis?.host || 'localhost',
-              port: opt?.redis?.port || 6379,
-              password: opt?.redis?.password || null,
-            },
-            prefix: opt?.redis?.prefix || '{worker}',
-           });
+
+          const redisConnOpts = _getConnOpts(opt.redis);
+          REGISTERED_QUEUES[processorName] = new Queue(processorName, __getConnOpts(opt.redis));
           REGISTERED_QUEUES[processorName].process(opt.jobsProcesses[processorName] || opt.defaultProcesses, fileName);
         }
 
