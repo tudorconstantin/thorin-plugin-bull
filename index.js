@@ -81,11 +81,11 @@ module.exports = function (thorin, opt, pluginName) {
     if (!redisOpts?.clustered) {
       return {
         redis: {
-          host: opt?.redis?.host || 'localhost',
-          port: opt?.redis?.port || 6379,
-          password: opt?.redis?.password || null,
+          host: redisOpts?.redis?.host || 'localhost',
+          port: redisOpts?.redis?.port || 6379,
+          password: redisOpts?.redis?.password || null,
         },
-        prefix: opt?.redis?.prefix || '{worker}',
+        prefix: redisOpts?.redis?.prefix || '{worker}',
       }
     }
 
