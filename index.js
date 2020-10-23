@@ -81,11 +81,11 @@ module.exports = function (thorin, opt, pluginName) {
     if (!redisOpts?.clustered) {
       return {
         redis: {
-          host: redisOpts?.redis?.host || 'localhost',
-          port: redisOpts?.redis?.port || 6379,
-          password: redisOpts?.redis?.password || null,
+          host: redisOpts?.host || 'localhost',
+          port: redisOpts?.port || 6379,
+          password: redisOpts?.password || null,
         },
-        prefix: redisOpts?.redis?.prefix || '{worker}',
+        prefix: redisOpts?.prefix || '{worker}',
       }
     }
 
@@ -104,8 +104,8 @@ module.exports = function (thorin, opt, pluginName) {
         }
       }
     }
-
     return opts;
+
   }
   /*
    * Setup the job plugin
@@ -122,12 +122,11 @@ module.exports = function (thorin, opt, pluginName) {
             throw new Error(`Job ${REGISTERED_QUEUES[processorName]} already exists`);
           }
 
-          const redisConnOpts = _getConnOpts(opt.redis);
-          REGISTERED_QUEUES[processorName] = new Queue(processorName, __getConnOpts(opt.redis));
+          REGISTERED_QUEUES[processorName] = new Queue(processorName, _getConnOpts(opt.redis));
           REGISTERED_QUEUES[processorName].process(opt.jobsProcesses[processorName] || opt.defaultProcesses, fileName);
         }
-
       } catch (e) {
+        return done(e);
       }
     }
     done();
@@ -138,8 +137,16 @@ module.exports = function (thorin, opt, pluginName) {
    * */
   pluginObj.run = function (done) {
     if (!opt.enabled) return done();
-    pluginObj.setup(() => { });
-    done();
+    pluginObj.setup(function (err) {
+      if (err) {
+        const logger = thorin.logger(this.name);
+        logger.warn(`Could not initiate redis connection ${this.name}`);
+        if (opt.required) {
+          return done(thorin.error('REDIS.CONNECTION', 'Could not establish a connection to redis.', err));
+        }
+      }
+      done();
+    });
   }
 
 
