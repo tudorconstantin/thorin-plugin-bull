@@ -78,14 +78,14 @@ module.exports = function (thorin, opt, pluginName) {
 
   const _getConnOpts = function (redisOpts) {
 
-    if (!redisOpts?.clustered) {
+    if (!redisOpts.clustered) {
       return {
         redis: {
-          host: redisOpts?.host || 'localhost',
-          port: redisOpts?.port || 6379,
-          password: redisOpts?.password || null,
+          host: redisOpts.host || 'localhost',
+          port: redisOpts.port || 6379,
+          password: redisOpts.password || null,
         },
-        prefix: redisOpts?.prefix || '{worker}',
+        prefix: redisOpts.prefix || '{worker}',
       }
     }
 
