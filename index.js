@@ -25,6 +25,18 @@ module.exports = function (thorin, opt, pluginName) {
       helloWorld: 5,
     },
   }, opt);
+
+  let erroredQueue = {
+    name: '',
+    err: null,
+  };
+  process.on('unhandledRejection', (reason, p) => {
+    const logger = thorin.logger(erroredQueue.name, 'unnamedQueue');
+    if(opt.required){
+      logger.error(`Exiting: ${reason}`);
+      return thorin.exit();
+    }
+  });
   const pluginObj = {},
     async = thorin.util.async,
     REGISTERED_QUEUES = {};
@@ -112,8 +124,8 @@ module.exports = function (thorin, opt, pluginName) {
    * */
   pluginObj.setup = function (done) {
     const SETUP_DIRECTORIES = ['app/jobs'];
-    for (let i = 0; i < SETUP_DIRECTORIES.length; i++) {
-      try {
+    try {
+      for (let i = 0; i < SETUP_DIRECTORIES.length; i++) {
         thorin.util.fs.ensureDirSync(path.normalize(thorin.root + '/' + SETUP_DIRECTORIES[i]));
         const processorFiles = dirWalk(path.normalize(thorin.root + '/' + SETUP_DIRECTORIES[i]));
         for (const fileName of processorFiles) {
@@ -123,13 +135,21 @@ module.exports = function (thorin, opt, pluginName) {
           }
 
           REGISTERED_QUEUES[processorName] = new Queue(processorName, _getConnOpts(opt.redis));
+          REGISTERED_QUEUES[processorName]
+            .on('error', function (error) {
+              const logger = thorin.logger(this.name);
+              logger.warn(`Error in jobQueue: ${error.message} (${process.pid})`);
+              erroredQueue.name=this.name;
+              erroredQueue.err = error;
+              return Promise.reject(error);
+            });
           REGISTERED_QUEUES[processorName].process(opt.jobsProcesses[processorName] || opt.defaultProcesses, fileName);
         }
-      } catch (e) {
-        return done(e);
       }
+      return done();
+    } catch (e) {
+      return done(e);
     }
-    done();
   };
 
   /*
@@ -139,10 +159,10 @@ module.exports = function (thorin, opt, pluginName) {
     if (!opt.enabled) return done();
     pluginObj.setup(function (err) {
       if (err) {
-        const logger = thorin.logger(this.name);
-        logger.warn(`Could not initiate redis connection ${this.name}`);
+        const logger = thorin.logger('thorin-plugin-bull');
+        logger.warn(`Could not initiate redis connection`, err);
         if (opt.required) {
-          return done(thorin.error('REDIS.CONNECTION', 'Could not establish a connection to redis.', err));
+          thorin.exit();
         }
       }
       done();
@@ -156,3 +176,4 @@ module.exports = function (thorin, opt, pluginName) {
   return pluginObj;
 };
 module.exports.publicName = 'jobs';
+
