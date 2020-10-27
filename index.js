@@ -102,8 +102,8 @@ module.exports = function (thorin, opt, pluginName) {
     }
 
     const Redis = require('ioredis');
-    const client = new Redis.cluster([{ host: redisOpts.host }], { dnsLookup: (address, callback) => callback(null, address) });
-    const subscriber = new Redis.cluster([{ host: redisOpts.host }], { dnsLookup: (address, callback) => callback(null, address) });
+    const client = new Redis.Cluster([{ host: redisOpts.host }], { dnsLookup: (address, callback) => callback(null, address) });
+    const subscriber = new Redis.Cluster([{ host: redisOpts.host }], { dnsLookup: (address, callback) => callback(null, address) });
     let opts = {
       createClient: function (type) {
         switch (type) {
@@ -112,9 +112,10 @@ module.exports = function (thorin, opt, pluginName) {
           case 'subscriber':
             return subscriber;
           default:
-            return new Redis.cluster([{ host: redisOpts.host }], { dnsLookup: (address, callback) => callback(null, address) });
+            return new Redis.Cluster([{ host: redisOpts.host }], { dnsLookup: (address, callback) => callback(null, address) });
         }
-      }
+      },
+      prefix: redisOpts.prefix || '{worker}',
     }
     return opts;
 
@@ -160,7 +161,7 @@ module.exports = function (thorin, opt, pluginName) {
     pluginObj.setup(function (err) {
       if (err) {
         const logger = thorin.logger('thorin-plugin-bull');
-        logger.warn(`Could not initiate redis connection`, err);
+        logger.warn(`Could not initiate redis connection: ${err.message}`);
         if (opt.required) {
           thorin.exit();
         }
