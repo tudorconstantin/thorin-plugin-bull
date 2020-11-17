@@ -101,9 +101,11 @@ module.exports = function (thorin, opt, pluginName) {
       }
     }
 
+    let redisOptions = redisOpts.redisOptions || {};
+    
     const Redis = require('ioredis');
-    const client = new Redis.Cluster([{ host: redisOpts.host }], { dnsLookup: (address, callback) => callback(null, address) });
-    const subscriber = new Redis.Cluster([{ host: redisOpts.host }], { dnsLookup: (address, callback) => callback(null, address) });
+    const client = new Redis.Cluster([{ host: redisOpts.host }], { dnsLookup: (address, callback) => callback(null, address), redisOptions });
+    const subscriber = new Redis.Cluster([{ host: redisOpts.host }], { dnsLookup: (address, callback) => callback(null, address), redisOptions  });
     let opts = {
       createClient: function (type) {
         switch (type) {
@@ -112,7 +114,7 @@ module.exports = function (thorin, opt, pluginName) {
           case 'subscriber':
             return subscriber;
           default:
-            return new Redis.Cluster([{ host: redisOpts.host }], { dnsLookup: (address, callback) => callback(null, address) });
+            return new Redis.Cluster([{ host: redisOpts.host }], { dnsLookup: (address, callback) => callback(null, address), redisOptions  });
         }
       },
       prefix: redisOpts.prefix || '{worker}',
