@@ -4,7 +4,7 @@
   "version": "1.3.1",
   "dependencies": {
     "bull": "^3.15.0",
-    "ioredis": "^4.17.3"
+    "ioredis": "^5.0.0"
   },
   "description": "Thorin.js job queue plugin based on Bull",
   "main": "index.js",
